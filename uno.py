@@ -11,18 +11,8 @@ from scipy.spatial.distance import pdist
 from tabulate import tabulate
 
 # -----------------------------
-# Carga de datos
+# Carga de datos --> listo
 # -----------------------------
-def load_positions(filename):
-    """
-    Carga las posiciones (x, y) de los votos desde un archivo JSON.
-    """
-    with open(filename, 'r') as f:
-        data = json.load(f)
-    votes = data['rollcalls'][0]['votes']
-    positions = np.array([[v['x'], v['y']] for v in votes])
-    return positions
-
 def load_positions_and_parties(filename):
     """
     Carga las posiciones (x, y) y los partidos de los votos desde un archivo JSON.
@@ -35,18 +25,8 @@ def load_positions_and_parties(filename):
     return coordenadas, partidos
 
 # -----------------------------
-# Utilidades y fitness
+# Utilidades y fitness --> listo
 # -----------------------------
-def compute_distance_matrix(positions):
-    """
-    Calcula la matriz de distancias euclidianas entre todas las posiciones.
-    """
-    n = positions.shape[0]
-    dist = np.zeros((n, n))
-    for i in range(n):
-        dist[i] = np.linalg.norm(positions - positions[i], axis=1)
-    return dist
-
 def fitness(coalition, positions, fitness_cache=None):
     """
     Calcula el fitness de una coalición: suma de distancias entre todos los miembros.
@@ -61,7 +41,7 @@ def fitness(coalition, positions, fitness_cache=None):
         val = float('inf')
     else:
         puntos = positions[indices]
-        val = np.sum(pdist(puntos, metric='euclidean'))
+        val = np.sum(pdist(puntos, metric='euclidean')) # Distancia Euclidiana con pdist
     if fitness_cache is not None:
         fitness_cache[key] = val
     return val
@@ -129,12 +109,14 @@ def correct_coalition(coalition, quorum):
 # -----------------------------
 # Algoritmo genético principal
 # -----------------------------
-def genetic_mwc(positions, quorum, pop_size=38, gens=100, mutation_rate=0.17, selection_prob=0.141, print_all_gens=False):
+def genetic_mwc(positions, quorum, pop_size=38, gens=100, mutation_rate=0.17, selection_prob=0.141):
     """
     Algoritmo genético para encontrar la coalición ganadora mínima (MWC).
     """
-    n = positions.shape[0]
+    n = positions.shape[0] # Total de congresistas
     population = initialize_population(pop_size, n, quorum)
+
+    # Variables de seguimiendo a proximos mejores resultados
     best = None
     best_score = float('inf')
     k = max(2, int(selection_prob * pop_size))
@@ -155,7 +137,7 @@ def genetic_mwc(positions, quorum, pop_size=38, gens=100, mutation_rate=0.17, se
             child = mutate(child, n, mutation_rate=mutation_rate)
             new_pop.append(child)
         population = new_pop
-        print(f"Generación {gen+1}/{gens} - Mejor Fitness: {elite_score:.4f}")
+        #print(f"Generación {gen+1}/{gens} - Mejor Fitness: {elite_score:.4f}")
     return np.where(best == 1)[0], best_score
 
 # -----------------------------
@@ -231,10 +213,11 @@ if __name__ == '__main__':
     # Parámetros principales
     QUORUM = 216
     POS_FILE = 'votes.json'
-    VALOR_ESPERADO = 9686.93831
     POP_SIZE = 38
     MUTATION_RATE = 0.1700019
     SELECTION_PROB = 0.141
+
+    VALOR_ESPERADO = 9686.93831
 
     # Carga de datos de posiciones y partidos
     coordenadas, partidos = load_positions_and_parties(POS_FILE)
@@ -242,14 +225,13 @@ if __name__ == '__main__':
 
     # Ejecución del algoritmo genético
     t0 = time.time()
-    gens = 10000
+    gens = 15000
     best_coalition, best_fit = genetic_mwc(
         coordenadas, QUORUM,
         pop_size=POP_SIZE,
         gens=gens,
         mutation_rate=MUTATION_RATE,
         selection_prob=SELECTION_PROB,
-        print_all_gens=True  # Imprime todas las generaciones
     )
     t1 = time.time()
 
