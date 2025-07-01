@@ -61,7 +61,7 @@ def initialize_population(pop_size, n, quorum):
         population.append(coalition)
     return population
 
-def tournament_selection(pop, scores, k=3):
+def tournament_selection(pop, scores, k=None):
     """
     Selección por torneo: elige el mejor de k individuos aleatorios.
     """
@@ -137,7 +137,7 @@ def genetic_mwc(positions, quorum, pop_size=38, gens=100, mutation_rate=0.17, se
             child = mutate(child, n, mutation_rate=mutation_rate)
             new_pop.append(child)
         population = new_pop
-        #print(f"Generación {gen+1}/{gens} - Mejor Fitness: {elite_score:.4f}")
+        print(f"Generación {gen+1}/{gens} - Mejor Fitness: {elite_score:.4f}")
     return np.where(best == 1)[0], best_score
 
 # -----------------------------
@@ -225,7 +225,7 @@ if __name__ == '__main__':
 
     # Ejecución del algoritmo genético
     t0 = time.time()
-    gens = 15000
+    gens = 10000
     best_coalition, best_fit = genetic_mwc(
         coordenadas, QUORUM,
         pop_size=POP_SIZE,
